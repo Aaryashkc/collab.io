@@ -2,6 +2,8 @@
 
 A real-time collaborative code editor built with React/Vite + Express/Socket.IO + Monaco. Multiple users join a shared room, see live presence, and edit the same document simultaneously via Yjs CRDTs.
 
+> **Note:** This project was created to learn AWS and Docker.
+
 ## Features
 
 - **Real-time collaborative editing** via Yjs + `y-monaco`
@@ -77,3 +79,29 @@ Open `http://localhost:5173` (or whatever Vite prints). Append `?username=yourna
 | **Top bar** | Brand, language switcher, live avatar strip + online count |
 | **Sidebar** | Participant list with colored avatars; green sync indicator |
 | **Editor** | Monaco with JetBrains Mono, hidden minimap, slim scrollbars, dynamic file tab |
+
+## Docker Setup
+
+The project includes a multi-stage `dockerfile` that builds and serves both frontend and backend in a single container.
+
+### How It Works
+
+1. **Frontend Build Stage** (`frontend-builder`)
+   - Uses `node:20-alpine` as base image
+   - Copies frontend source and installs dependencies
+   - Builds static assets to `/app/dist`
+
+2. **Final Stage**
+   - Starts fresh with `node:20-alpine` (smaller image, no build tools)
+   - Copies backend code and installs production dependencies
+   - Copies built frontend from `frontend-builder` stage into `/app/public`
+   - Express serves these static files via `app.use(express.static("public"))`
+
+### Build and Run
+
+```bash
+docker build -t collab-io .
+docker run -p 3000:3000 collab-io
+```
+
+The app is then available at `http://localhost:3000`.
